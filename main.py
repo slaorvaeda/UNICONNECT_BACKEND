@@ -5,8 +5,14 @@ from app.core.database import engine, Base
 from app.routers import auth, student, chat, admin, teacher
 from app.core.config import PORT
 
+from app.seed import seed_db
+
 # Automatically create tables in local SQLite/PostgreSQL
 Base.metadata.create_all(bind=engine)
+try:
+    seed_db()
+except Exception as e:
+    print(f"Seed note: {e}")
 
 app = FastAPI(
     title="UniConnect Smart College App API",

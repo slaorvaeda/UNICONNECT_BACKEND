@@ -26,7 +26,7 @@ class UserResponse(UserBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Attendance Schemas
@@ -41,7 +41,7 @@ class AttendanceResponse(AttendanceBase):
     student_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Event Schemas
@@ -59,7 +59,7 @@ class EventResponse(EventBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Grievance Schemas
@@ -79,7 +79,7 @@ class GrievanceResponse(GrievanceBase):
     response: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Notice Schemas
@@ -96,7 +96,7 @@ class NoticeResponse(NoticeBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Fee Schemas
@@ -111,7 +111,7 @@ class FeeResponse(FeeBase):
     paid_at: Optional[datetime.datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Academic Records Schemas
@@ -127,7 +127,7 @@ class AcademicRecordResponse(AcademicRecordBase):
     student_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Exam Schedule Schemas
@@ -139,7 +139,7 @@ class ExamScheduleResponse(BaseModel):
     venue: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ChatMessageSchema(BaseModel):
     role: str
@@ -147,6 +147,7 @@ class ChatMessageSchema(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessageSchema]
+    student_id: Optional[int] = None
 
 # Department Schemas
 class DepartmentBase(BaseModel):
