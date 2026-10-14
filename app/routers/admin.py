@@ -27,19 +27,29 @@ def get_students(db: Session = Depends(get_db)):
 
 @router.post("/students", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def create_student(request: schemas.UserCreate, db: Session = Depends(get_db)):
-    # Check if user already exists
-    existing = db.query(models.User).filter(func.lower(models.User.email) == func.lower(request.email)).first()
+    email_clean = request.email.strip() if request.email else ""
+    existing = db.query(models.User).filter(func.lower(models.User.email) == func.lower(email_clean)).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with this email already exists."
         )
     
+    if request.student_id and request.student_id.strip():
+        existing_stu = db.query(models.User).filter(
+            func.lower(models.User.student_id) == func.lower(request.student_id.strip())
+        ).first()
+        if existing_stu:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this Student ID already exists."
+            )
+    
     new_student = models.User(
-        name=request.name,
-        email=request.email,
+        name=request.name.strip() if request.name else "",
+        email=email_clean,
         role="student",
-        student_id=request.student_id,
+        student_id=request.student_id.strip() if request.student_id else None,
         department=request.department,
         year=request.year,
         section=request.section,
@@ -49,10 +59,17 @@ def create_student(request: schemas.UserCreate, db: Session = Depends(get_db)):
         blood_group=request.blood_group,
         address=request.address
     )
-    db.add(new_student)
-    db.commit()
-    db.refresh(new_student)
-    return new_student
+    try:
+        db.add(new_student)
+        db.commit()
+        db.refresh(new_student)
+        return new_student
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Could not add student: {str(e)}"
+        )
 
 @router.get("/teachers", response_model=List[schemas.UserResponse])
 def get_teachers(db: Session = Depends(get_db)):
@@ -61,19 +78,30 @@ def get_teachers(db: Session = Depends(get_db)):
 
 @router.post("/teachers", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def create_teacher(request: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(models.User).filter(func.lower(models.User.email) == func.lower(request.email)).first()
+    email_clean = request.email.strip() if request.email else ""
+    existing = db.query(models.User).filter(func.lower(models.User.email) == func.lower(email_clean)).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with this email already exists."
         )
     
+    if request.employee_id and request.employee_id.strip():
+        existing_emp = db.query(models.User).filter(
+            func.lower(models.User.employee_id) == func.lower(request.employee_id.strip())
+        ).first()
+        if existing_emp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this Employee ID already exists."
+            )
+    
     new_teacher = models.User(
-        name=request.name,
-        email=request.email,
+        name=request.name.strip() if request.name else "",
+        email=email_clean,
         role="teacher",
         department=request.department,
-        employee_id=request.employee_id,
+        employee_id=request.employee_id.strip() if request.employee_id else None,
         designation=request.designation,
         dob=request.dob,
         phone=request.phone,
@@ -81,10 +109,17 @@ def create_teacher(request: schemas.UserCreate, db: Session = Depends(get_db)):
         blood_group=request.blood_group,
         address=request.address
     )
-    db.add(new_teacher)
-    db.commit()
-    db.refresh(new_teacher)
-    return new_teacher
+    try:
+        db.add(new_teacher)
+        db.commit()
+        db.refresh(new_teacher)
+        return new_teacher
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Could not add teacher: {str(e)}"
+        )
 
 @router.post("/notices", response_model=schemas.NoticeResponse, status_code=status.HTTP_201_CREATED)
 def create_notice(request: schemas.NoticeCreate, db: Session = Depends(get_db)):

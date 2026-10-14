@@ -34,18 +34,19 @@ def compute_dob_passwords(dob_str: str) -> list:
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     query_id = request.email.strip()
     
-    # Lookup by Email OR Student ID / USN OR Phone
+    # Lookup by Email OR Student ID / USN OR Employee ID OR Phone
     user = db.query(models.User).filter(func.lower(models.User.email) == func.lower(query_id)).first()
     if not user:
         user = db.query(models.User).filter(
             (func.lower(models.User.student_id) == func.lower(query_id)) |
+            (func.lower(models.User.employee_id) == func.lower(query_id)) |
             (models.User.phone == query_id)
         ).first()
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found with this email, USN, or phone number."
+            detail="User not found with this email, USN, Employee ID, or phone number."
         )
 
     # Validate Password: DOB (DDMMYYYY format) or master default '123456'
